@@ -46,6 +46,12 @@ app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors({
   origin(origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    try {
+      const { hostname } = new URL(origin);
+      if (hostname.endsWith('.vercel.app')) return callback(null, true);
+    } catch {
+      // Fall through to the explicit rejection below.
+    }
     return callback(new Error(`Origin izinli degil: ${origin}`));
   },
   credentials: true
