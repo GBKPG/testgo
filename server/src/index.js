@@ -354,7 +354,21 @@ app.get('/api/findings', requireAuth, requireProject, async (req, res) => {
     WHERE f.project_id = ?
     ORDER BY f.updated_at DESC
   `).all(req.projectId);
-  res.json({ findings: rows.map((row) => ({ ...row, ui_status: sessionStatusReverseMap[row.status] || 'New' })) });
+  const findings = await Promise.all(rows.map(async (row) => {
+    const logContributors = await db.prepare(`
+      SELECT DISTINCT users.name as name
+      FROM session_logs
+      LEFT JOIN users ON users.id = session_logs.created_by
+      WHERE session_logs.finding_id = ? AND users.name IS NOT NULL
+      ORDER BY users.name
+    `).all(row.id);
+    return {
+      ...row,
+      contributor_names: [row.created_by_name, ...logContributors.map((contributor) => contributor.name)],
+      ui_status: sessionStatusReverseMap[row.status] || 'New'
+    };
+  }));
+  res.json({ findings });
 });
 
 app.get('/api/findings/:id', requireAuth, requireProject, async (req, res) => {

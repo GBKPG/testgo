@@ -543,8 +543,9 @@ function FindingsBoard({ project, findings, users, setModal, selectedFindingId, 
               </span>
               <span className={`session-state state-${(finding.ui_status || 'New').toLowerCase().replace(/\s+/g, '-')}`}>{finding.ui_status || 'New'}</span>
               <span className="contributors">
-                <AvatarBadge label={finding.created_by_name || 'Q'} />
-                {finding.assigned_to_name && finding.assigned_to_name !== finding.created_by_name ? <AvatarBadge label={finding.assigned_to_name} alt /> : null}
+                {getSessionContributors(finding).map((name, index) => (
+                  <AvatarBadge key={name} label={name} alt={index > 0} />
+                ))}
               </span>
               <span className="activity-cells" aria-hidden="true">
                 {buildActivityCells(finding).map((cell, index) => (
@@ -578,6 +579,25 @@ function AvatarBadge({ label, alt = false }) {
     .map((part) => part[0]?.toUpperCase() || '')
     .join('') || 'Q';
   return <span className={`avatar-badge ${alt ? 'alt' : ''}`}>{initials}</span>;
+}
+
+function getSessionContributors(finding, logs = []) {
+  const seen = new Set();
+  const contributors = [];
+  const add = (name) => {
+    const cleanName = String(name || '').trim();
+    if (!cleanName) return;
+    const key = cleanName.toLocaleLowerCase('tr-TR');
+    if (seen.has(key)) return;
+    seen.add(key);
+    contributors.push(cleanName);
+  };
+
+  add(finding?.created_by_name);
+  (finding?.contributor_names || []).forEach(add);
+  logs.forEach((log) => add(log.created_by_name));
+
+  return contributors.length ? contributors : ['Q'];
 }
 
 function formatSessionDate(value) {
@@ -755,6 +775,7 @@ function SessionDetailPage({ id, project, users, onBack, refresh }) {
   if (!data) return <main className="findings-screen"><div className="empty">Session yukleniyor</div></main>;
 
   const finding = data.finding;
+  const contributors = getSessionContributors(finding, data.logs);
 
   return (
     <main className="findings-screen">
@@ -878,8 +899,9 @@ function SessionDetailPage({ id, project, users, onBack, refresh }) {
           <div className="side-panel">
             <div className="side-label">Contributors</div>
             <div className="contributors-stack">
-              <AvatarBadge label={finding.created_by_name || 'Q'} />
-              {finding.assigned_to_name ? <AvatarBadge label={finding.assigned_to_name} alt /> : null}
+              {contributors.map((name, index) => (
+                <AvatarBadge key={name} label={name} alt={index > 0} />
+              ))}
             </div>
           </div>
         </aside>
