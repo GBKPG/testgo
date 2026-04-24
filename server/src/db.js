@@ -32,7 +32,7 @@ async function createSqliteDb() {
 
 function createPostgresDb() {
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: normalizedDatabaseUrl(process.env.DATABASE_URL),
     ssl: process.env.PGSSLMODE === 'disable' ? false : { rejectUnauthorized: false },
     max: Number(process.env.PG_POOL_MAX || 3)
   });
@@ -64,6 +64,13 @@ function createPostgresDb() {
     },
     pool
   };
+}
+
+function normalizedDatabaseUrl(value) {
+  if (!value) return value;
+  const url = new URL(value);
+  url.searchParams.delete('sslmode');
+  return url.toString();
 }
 
 function toPostgresSql(sql) {
