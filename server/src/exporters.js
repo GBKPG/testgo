@@ -28,7 +28,7 @@ async function fetchCases(projectId, folderId, includeFindings) {
     FROM test_cases tc
     LEFT JOIN folders f ON f.id = tc.folder_id
     WHERE tc.project_id = ?
-    AND (? IS NULL OR tc.folder_id IN (
+    AND (CAST(? AS bigint) IS NULL OR tc.folder_id IN (
       WITH RECURSIVE tree(id) AS (
         SELECT id FROM folders WHERE id = ? AND project_id = ?
         UNION ALL

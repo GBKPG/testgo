@@ -239,7 +239,7 @@ app.get('/api/folders', requireAuth, requireProject, async (req, res) => {
 app.post('/api/folders', requireAuth, requireProject, async (req, res) => {
   const { name, parent_id } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'Klasör adı gerekli' });
-  const max = (await db.prepare('SELECT COALESCE(MAX(position), -1) + 1 as next FROM folders WHERE parent_id IS ? AND project_id = ?').get(parent_id ?? null, req.projectId)).next;
+  const max = (await db.prepare('SELECT COALESCE(MAX(position), -1) + 1 as next FROM folders WHERE parent_id IS NOT DISTINCT FROM ? AND project_id = ?').get(parent_id ?? null, req.projectId)).next;
   const result = await db.prepare('INSERT INTO folders (project_id, name, parent_id, position, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?)')
     .run(req.projectId, name.trim(), parent_id ?? null, max, req.session.id, req.session.id);
   const folder = await db.prepare('SELECT * FROM folders WHERE id = ?').get(result.lastInsertRowid);
@@ -269,8 +269,8 @@ app.get('/api/test-cases', requireAuth, requireProject, async (req, res) => {
     LEFT JOIN users c ON c.id = tc.created_by
     LEFT JOIN users u ON u.id = tc.updated_by
     WHERE tc.project_id = ?
-      AND (? IS NULL OR tc.folder_id = ?)
-      AND (? IS NULL OR lower(tc.title || ' ' || tc.description || ' ' || tc.steps || ' ' || tc.expected_result) LIKE '%' || lower(?) || '%')
+      AND (CAST(? AS bigint) IS NULL OR tc.folder_id = CAST(? AS bigint))
+      AND (CAST(? AS text) IS NULL OR lower(tc.title || ' ' || tc.description || ' ' || tc.steps || ' ' || tc.expected_result) LIKE '%' || lower(CAST(? AS text)) || '%')
     ORDER BY tc.position ASC, tc.id ASC
   `).all(req.projectId, folder_id || null, folder_id || null, q || null, q || null);
   res.json({ testCases: await Promise.all(rows.map(expandCase)) });
@@ -299,7 +299,7 @@ app.get('/api/test-cases/:id', requireAuth, requireProject, async (req, res) => 
 app.post('/api/test-cases', requireAuth, requireProject, async (req, res) => {
   const { folder_id, title, description, steps, expected_result } = req.body;
   if (!title?.trim()) return res.status(400).json({ error: 'Başlık gerekli' });
-  const position = (await db.prepare('SELECT COALESCE(MAX(position), -1) + 1 as next FROM test_cases WHERE folder_id IS ? AND project_id = ?').get(folder_id ?? null, req.projectId)).next;
+  const position = (await db.prepare('SELECT COALESCE(MAX(position), -1) + 1 as next FROM test_cases WHERE folder_id IS NOT DISTINCT FROM ? AND project_id = ?').get(folder_id ?? null, req.projectId)).next;
   const result = await db.prepare(`
     INSERT INTO test_cases (project_id, folder_id, title, description, steps, expected_result, position, created_by, updated_by)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -323,7 +323,7 @@ app.post('/api/test-cases/:id/copy', requireAuth, requireProject, async (req, re
   const current = await db.prepare('SELECT * FROM test_cases WHERE id = ? AND project_id = ?').get(req.params.id, req.projectId);
   if (!current) return res.status(404).json({ error: 'Test case bulunamadı' });
   const folderId = req.body.folder_id === undefined ? current.folder_id : req.body.folder_id;
-  const position = (await db.prepare('SELECT COALESCE(MAX(position), -1) + 1 as next FROM test_cases WHERE folder_id IS ? AND project_id = ?').get(folderId ?? null, req.projectId)).next;
+  const position = (await db.prepare('SELECT COALESCE(MAX(position), -1) + 1 as next FROM test_cases WHERE folder_id IS NOT DISTINCT FROM ? AND project_id = ?').get(folderId ?? null, req.projectId)).next;
   const result = await db.prepare(`
     INSERT INTO test_cases (project_id, folder_id, title, description, steps, expected_result, position, created_by, updated_by)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
