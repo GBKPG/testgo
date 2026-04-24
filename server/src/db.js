@@ -34,7 +34,9 @@ function createPostgresDb() {
   const pool = new Pool({
     connectionString: normalizedDatabaseUrl(process.env.DATABASE_URL),
     ssl: process.env.PGSSLMODE === 'disable' ? false : { rejectUnauthorized: false },
-    max: Number(process.env.PG_POOL_MAX || 3)
+    max: Number(process.env.PG_POOL_MAX || 1),
+    idleTimeoutMillis: Number(process.env.PG_IDLE_TIMEOUT_MS || 10000),
+    connectionTimeoutMillis: Number(process.env.PG_CONNECTION_TIMEOUT_MS || 10000)
   });
 
   return {
