@@ -101,7 +101,11 @@ async function requireProject(req, res, next) {
   next();
 }
 
-app.get('/api/health', (_, res) => res.json({ ok: true }));
+app.get('/api/health', (_, res) => res.json({
+  ok: true,
+  dialect: db.dialect,
+  hasDatabaseUrl: Boolean(process.env.DATABASE_URL)
+}));
 
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;

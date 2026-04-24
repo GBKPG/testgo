@@ -1,4 +1,3 @@
-import Database from 'better-sqlite3';
 import bcrypt from 'bcryptjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,9 +7,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = path.join(__dirname, '..', 'data', 'qa-lite.sqlite');
 const isPostgres = Boolean(process.env.DATABASE_URL);
 
-export const db = isPostgres ? createPostgresDb() : createSqliteDb();
+export const db = isPostgres ? createPostgresDb() : await createSqliteDb();
 
-function createSqliteDb() {
+async function createSqliteDb() {
+  const { default: Database } = await import('better-sqlite3');
   const sqlite = new Database(dbPath);
   sqlite.pragma('journal_mode = WAL');
   sqlite.pragma('foreign_keys = ON');
