@@ -101,11 +101,26 @@ async function requireProject(req, res, next) {
   next();
 }
 
-app.get('/api/health', (_, res) => res.json({
-  ok: true,
-  dialect: db.dialect,
-  hasDatabaseUrl: Boolean(process.env.DATABASE_URL)
-}));
+app.get('/api/health', async (_, res) => {
+  try {
+    const row = await db.prepare('SELECT COUNT(*) as total FROM users').get();
+    res.json({
+      ok: true,
+      dbOk: true,
+      dialect: db.dialect,
+      hasDatabaseUrl: Boolean(process.env.DATABASE_URL),
+      users: Number(row?.total || 0)
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      dbOk: false,
+      dialect: db.dialect,
+      hasDatabaseUrl: Boolean(process.env.DATABASE_URL),
+      error: error.message
+    });
+  }
+});
 
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
