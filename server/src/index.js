@@ -24,7 +24,7 @@ if (process.env.VERCEL_URL) {
 }
 const uploadDir = process.env.UPLOAD_DIR
   ? (path.isAbsolute(process.env.UPLOAD_DIR) ? process.env.UPLOAD_DIR : path.join(root, process.env.UPLOAD_DIR))
-  : path.join(root, 'uploads');
+  : (process.env.VERCEL === '1' ? path.join('/tmp', 'qa-lite-uploads') : path.join(root, 'uploads'));
 fs.mkdirSync(uploadDir, { recursive: true });
 
 await migrate();
