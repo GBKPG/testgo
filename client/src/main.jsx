@@ -123,7 +123,7 @@ function App() {
     api('/me').then((data) => setUser(data.user)).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="boot">QA Lite</div>;
+  if (loading) return <div className="boot">TestGo</div>;
   if (!user) return <Login onLogin={setUser} />;
   return <Shell user={user} onLogout={() => setUser(null)} />;
 }
@@ -148,8 +148,8 @@ function Login({ onLogin }) {
     <main className="login-shell">
       <form className="login-panel" onSubmit={submit}>
         <div>
-          <span className="mark">QA</span>
-          <h1>QA Lite</h1>
+          <span className="mark">TG</span>
+          <h1>TestGo</h1>
           <p>Manuel QA ekipleri için hızlı test yönetimi</p>
         </div>
         <label>Email<input value={email} onChange={(event) => setEmail(event.target.value)} /></label>
@@ -220,7 +220,7 @@ function ProjectHome({ user, projects, onOpen, onLogout, onNewProject, onDeleteP
   return (
     <main className="project-home">
       <header className="home-top">
-        <div className="home-brand"><span className="mark">QA</span><strong>QA Lite</strong></div>
+        <div className="home-brand"><span className="mark">TG</span><strong>TestGo</strong></div>
         <div className="home-actions">
           {user.role === 'Admin' && <button className="primary" onClick={onNewProject}><Plus size={16} /> Project</button>}
           <button onClick={onLogout}><LogOut size={16} /></button>
@@ -856,7 +856,7 @@ function SessionDetailPage({ id, project, users, onBack, refresh }) {
                 <div className="log-avatar">{(log.created_by_name || 'Q').trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('') || 'Q'}</div>
                 <div className="log-content">
                   <div className="log-header">
-                    <strong>{log.created_by_name || 'QA'}</strong>
+                    <strong>{log.created_by_name || 'TG'}</strong>
                     <span>{formatSessionDate(log.created_at)}</span>
                     <button className="log-menu-button" type="button" onClick={() => setMenuLogId((current) => current === log.id ? null : log.id)}>≡</button>
                     {menuLogId === log.id && (
