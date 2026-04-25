@@ -190,6 +190,14 @@ app.patch('/api/projects/:projectId', requireAuth, requireAdmin, requireProject,
   res.json({ project: await db.prepare('SELECT * FROM projects WHERE id = ?').get(req.projectId) });
 });
 
+app.delete('/api/projects/:projectId', requireAuth, requireAdmin, requireProject, async (req, res) => {
+  await db.prepare('DELETE FROM findings WHERE project_id = ?').run(req.projectId);
+  await db.prepare('DELETE FROM test_cases WHERE project_id = ?').run(req.projectId);
+  await db.prepare('DELETE FROM folders WHERE project_id = ?').run(req.projectId);
+  await db.prepare('DELETE FROM projects WHERE id = ?').run(req.projectId);
+  res.json({ ok: true });
+});
+
 app.get('/api/projects/:projectId/documentation', requireAuth, requireProject, async (req, res) => {
   res.json({ documentation: req.project.documentation || '' });
 });

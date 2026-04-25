@@ -129,8 +129,8 @@ function App() {
 }
 
 function Login({ onLogin }) {
-  const [email, setEmail] = useState('admin@local.test');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   async function submit(event) {
@@ -182,6 +182,14 @@ function Shell({ user, onLogout }) {
     onLogout();
   }
 
+  async function deleteProject(project) {
+    const ok = window.confirm(`${project.name} projesini silmek istiyor musunuz? Bu islem geri alinamaz.`);
+    if (!ok) return;
+    await api(`/projects/${project.id}`, { method: 'DELETE' });
+    if (selectedProject?.id === project.id) setSelectedProject(null);
+    await loadProjects();
+  }
+
   if (!selectedProject) {
     return (
       <>
@@ -191,6 +199,7 @@ function Shell({ user, onLogout }) {
           onOpen={setSelectedProject}
           onLogout={logout}
           onNewProject={() => setModal({ type: 'project' })}
+          onDeleteProject={deleteProject}
         />
         {modal?.type === 'project' && <ProjectModal setModal={setModal} reload={loadProjects} />}
       </>
@@ -207,7 +216,7 @@ function Shell({ user, onLogout }) {
   );
 }
 
-function ProjectHome({ user, projects, onOpen, onLogout, onNewProject }) {
+function ProjectHome({ user, projects, onOpen, onLogout, onNewProject, onDeleteProject }) {
   return (
     <main className="project-home">
       <header className="home-top">
@@ -222,10 +231,22 @@ function ProjectHome({ user, projects, onOpen, onLogout, onNewProject }) {
         <div className="project-list-title">Project</div>
         <div className="project-list">
           {projects.map((project) => (
-            <button key={project.id} className="project-item" onClick={() => onOpen(project)}>
-              <span className="project-icon" style={{ backgroundColor: project.color }}>{project.icon}</span>
-              <span>{project.name}</span>
-            </button>
+            <div key={project.id} className="project-item-row">
+              <button className="project-item" onClick={() => onOpen(project)}>
+                <span className="project-icon" style={{ backgroundColor: project.color }}>{project.icon}</span>
+                <span>{project.name}</span>
+              </button>
+              {user.role === 'Admin' && (
+                <button
+                  type="button"
+                  className="project-delete-button"
+                  title="Projeyi sil"
+                  onClick={() => onDeleteProject(project)}
+                >
+                  <Trash2 size={15} />
+                </button>
+              )}
+            </div>
           ))}
           {projects.length === 0 && <div className="empty slim">Henüz proje yok</div>}
         </div>

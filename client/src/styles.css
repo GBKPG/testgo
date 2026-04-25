@@ -128,20 +128,48 @@ button:disabled {
   padding-top: 7px;
 }
 
+.project-item-row {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+}
+
 .project-item {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   border: 0;
   background: transparent;
   justify-content: flex-start;
   gap: 12px;
   min-height: 42px;
-  padding: 4px 18px;
+  padding: 4px 10px 4px 18px;
   color: #2b6fb7;
   font-size: 15px;
 }
 
-.project-item:hover {
+.project-item-row:hover {
   background: #eef5fb;
+}
+
+.project-delete-button {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+  border: 1px solid #d8e1ec;
+  background: #fff;
+  color: #64748b;
+  opacity: 0;
+}
+
+.project-item-row:hover .project-delete-button,
+.project-delete-button:focus-visible {
+  opacity: 1;
+}
+
+.project-delete-button:hover {
+  color: #dc2626;
+  border-color: #fecaca;
+  background: #fff5f5;
 }
 
 .product-shell {
