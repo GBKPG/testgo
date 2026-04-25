@@ -25,18 +25,24 @@ if (process.env.VERCEL_URL) {
 const uploadDir = process.env.UPLOAD_DIR
   ? (path.isAbsolute(process.env.UPLOAD_DIR) ? process.env.UPLOAD_DIR : path.join(root, process.env.UPLOAD_DIR))
   : (process.env.VERCEL === '1' ? path.join('/tmp', 'qa-lite-uploads') : path.join(root, 'uploads'));
+const useInlineUploads = process.env.INLINE_UPLOADS === 'true' || process.env.VERCEL === '1';
 fs.mkdirSync(uploadDir, { recursive: true });
 
 await migrate();
 
+function safeUploadName(originalname = 'upload.bin') {
+  const safe = originalname.replace(/[^a-z0-9._-]/gi, '-').toLowerCase();
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}-${safe}`;
+}
+
 const storage = multer.diskStorage({
   destination: uploadDir,
-  filename: (_, file, cb) => {
-    const safe = file.originalname.replace(/[^a-z0-9._-]/gi, '-').toLowerCase();
-    cb(null, `${Date.now()}-${Math.random().toString(16).slice(2)}-${safe}`);
-  }
+  filename: (_, file, cb) => cb(null, safeUploadName(file.originalname))
 });
-const upload = multer({ storage, limits: { fileSize: 8 * 1024 * 1024 } });
+const upload = multer({
+  storage: useInlineUploads ? multer.memoryStorage() : storage,
+  limits: { fileSize: 8 * 1024 * 1024 }
+});
 
 const app = express();
 if (process.env.TRUST_PROXY === 'true') {
@@ -444,11 +450,14 @@ app.post('/api/findings/:id/attachments', requireAuth, requireProject, upload.si
   const finding = await db.prepare('SELECT * FROM findings WHERE id = ? AND project_id = ?').get(req.params.id, req.projectId);
   if (!finding || !req.file) return res.status(400).json({ error: 'Bulgu ve dosya gerekli' });
   const logId = req.body.log_id ? Number(req.body.log_id) : null;
-  const url = `/uploads/${req.file.filename}`;
+  const filename = req.file.filename || safeUploadName(req.file.originalname);
+  const url = useInlineUploads
+    ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+    : `/uploads/${filename}`;
   const result = await db.prepare(`
     INSERT INTO attachments (finding_id, log_id, filename, original_name, mime_type, size, url, uploaded_by)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(req.params.id, logId, req.file.filename, req.file.originalname, req.file.mimetype, req.file.size, url, req.session.id);
+  `).run(req.params.id, logId, filename, req.file.originalname, req.file.mimetype, req.file.size, url, req.session.id);
   res.status(201).json({ attachment: await db.prepare('SELECT * FROM attachments WHERE id = ?').get(result.lastInsertRowid) });
 });
 

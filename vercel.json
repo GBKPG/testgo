@@ -8,6 +8,10 @@
       "destination": "/api/index.mjs"
     },
     {
+      "source": "/uploads/(.*)",
+      "destination": "/api/index.mjs"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

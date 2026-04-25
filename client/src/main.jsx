@@ -39,7 +39,7 @@ const API = (import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'h
 const API_ORIGIN = API.endsWith('/api') ? API.slice(0, -4) : API;
 const assetUrl = (url) => {
   if (!url) return '';
-  if (/^https?:\/\//i.test(url)) return url;
+  if (/^(https?:\/\/|data:|blob:)/i.test(url)) return url;
   return `${API_ORIGIN}${url}`;
 };
 const SESSION_STATES = ['New', 'In Progress', 'Done'];
@@ -652,18 +652,23 @@ function StatusDropdown({ value, onChange }) {
 
   return (
     <div className="status-dropdown" ref={ref}>
-      <button type="button" className={`status-select-button ${statusClassName(value)}`} onClick={() => setOpen((current) => !current)}>
-        <span className="status-dot" style={{ backgroundColor: LOG_STATUS_META[value]?.color }} />
-        <span>{value}</span>
+      <button type="button" className={`status-select-button log-status-trigger ${statusClassName(value)}`} onClick={() => setOpen((current) => !current)}>
+        <span className="status-chip" style={{ '--status-accent': LOG_STATUS_META[value]?.color }}>
+          <span className="status-dot" style={{ backgroundColor: LOG_STATUS_META[value]?.color }} />
+          <span className="status-copy">
+            <small>Log status</small>
+            <strong>{value}</strong>
+          </span>
+        </span>
         <ChevronDown size={16} />
       </button>
       {open && (
-        <div className="status-dropdown-menu">
+        <div className="status-dropdown-menu log-status-menu">
           {LOG_STATUSES.map((status) => (
             <button
               key={status}
               type="button"
-              className={`status-option ${value === status ? 'active' : ''}`}
+              className={`status-option log-status-option ${value === status ? 'active' : ''}`}
               onClick={() => { onChange(status); setOpen(false); }}
             >
               <span className="status-dot" style={{ backgroundColor: LOG_STATUS_META[status]?.color }} />
