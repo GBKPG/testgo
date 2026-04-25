@@ -1005,16 +1005,26 @@ button:disabled {
 .attach-inline {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   color: #44556c;
   cursor: pointer;
   min-height: 50px;
   min-width: 220px;
-  padding: 0 16px;
-  border: 1px solid #d8e2ef;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+  padding: 8px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.92) 0%, rgba(248, 251, 255, 0.9) 45%, rgba(236, 244, 255, 0.95) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 14px 26px rgba(15, 23, 42, 0.08);
+}
+
+.attach-inline:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 18px 34px rgba(15, 23, 42, 0.12);
 }
 
 .attach-inline input {
@@ -1051,26 +1061,36 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 14px;
-  box-shadow: 0 14px 30px rgba(7, 134, 216, 0.24);
+  border-radius: 16px;
+  border: 1px solid rgba(18, 126, 216, 0.12);
+  background: linear-gradient(180deg, #1692f0 0%, #0d7fdb 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 18px 32px rgba(7, 134, 216, 0.24);
 }
 
 .session-composer-actions button:not(.primary):not(.status-select-button) {
-  border-radius: 14px;
+  border-radius: 16px;
   min-height: 50px;
-  padding-inline: 16px;
+  padding-inline: 18px;
 }
 
 .ghost-button {
-  border: 1px solid #d8e2ef;
-  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.92) 0%, rgba(248, 251, 255, 0.9) 45%, rgba(236, 244, 255, 0.95) 100%);
   color: #35506f;
   font-weight: 700;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 14px 26px rgba(15, 23, 42, 0.08);
 }
 
 .ghost-button:hover {
-  background: #fff;
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 18px 34px rgba(15, 23, 42, 0.12);
 }
 
 .state-dropdown {
