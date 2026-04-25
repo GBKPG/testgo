@@ -150,7 +150,7 @@ function Login({ onLogin }) {
         <div>
           <span className="mark">TG</span>
           <h1>TestGo</h1>
-          <p>Manuel QA ekipleri için hızlı test yönetimi</p>
+          <p>Test Case ve Test Dokumani olusturma projesi v0.1</p>
         </div>
         <label>Email<input value={email} onChange={(event) => setEmail(event.target.value)} /></label>
         <label>Şifre<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
